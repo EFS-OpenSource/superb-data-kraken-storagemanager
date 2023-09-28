@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: storagemanager$(postfix)
+  namespace: operations
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    cert-manager.io/acme-challenge-type: http01
+    appgw.ingress.kubernetes.io/appgw-ssl-certificate: cert-frontend-letsencrypt-cert
+spec:
+  rules:
+  - host: $(main-domain)
+    http:
+      paths:
+      - path: /storagemanager/*
+        pathType: Prefix
+        backend:
+          service:
+            name: storagemanager-service$(postfix)
+            port:
+              number: 8090

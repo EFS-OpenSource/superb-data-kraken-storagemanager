@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: storagemanager-service$(postfix)
+  namespace: operations
+  labels:
+    app: storagemanager
+    tier: backend
+spec:
+  selector:
+    app: storagemanager
+    tier: backend
+  ports:
+    - port: 8090

@@ -1,0 +1,18 @@
+spring:
+  config:
+    import: "kubernetes:"
+  application:
+    name: storagemanager-backend
+  cloud:
+    kubernetes:
+      secrets:
+        enabled: true
+        paths:
+          - /etc/storagemanager-secret
+      config:
+        paths:
+          - /etc/application/application.yml
+        enable-api: false
+      reload:
+        enabled:
+          false

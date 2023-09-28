@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: storagemanager
+  namespace: operations
+data:
+  application.yml: |-
+    apidoc:
+      title: EFS SDK StorageManager-API
+    sdk:
+      oauth2:
+        config-url: http://keycloak$(postfix)-http.operations.svc.cluster.local/auth/realms/efs-$(environment)/.well-known/openid-configuration
+        client-id: $(environment)-client
+        authorization-grant-type: authorization_code
+        scope: openid
+        user-name-attribute: preferred_username
+    management:
+      endpoints:
+        web:
+          exposure:
+            include: [
+              prometheus,
+              health,
+              info
+            ]
+    server:
+      port: 8090
+      servlet:
+        context-path: /storagemanager
+    storagemanager:
+      storage:
+        azure:
+          region: westeurope
+          cors:
+            origins: https://$(main-domain)
+            maxAge: 60
+          resourcegroup: $(resourcegroup)
+          # these are the default settings in the azure storage client and don't have to be explicitly set
+          storage-account-default-settings:
+            soft-delete-blobs-enabled: true
+            retention-time-deleted-blobs: 14
+            soft-delete-containers-enabled: true
+            retention-time-deleted-containers: 14
+            versioning-blobs-enabled: true
+            blob-versions-until-cool-tier-days: 1
+            blob-versions-until-archive-tier-days: 2
+            blob-versions-until-delete-days: 14

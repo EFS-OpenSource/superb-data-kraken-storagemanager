@@ -1,0 +1,6 @@
+storagemanager:
+  auth:
+    role-endpoint: http://localhost:8080/auth/admin/realms/efs-sdk/roles
+  organizationmanager:
+    organization-endpoint: http://localhost:8090/organizationmanager/api/v1.0/organization
+    space-endpoint: http://localhost:8090/organizationmanager/api/v1.0/space

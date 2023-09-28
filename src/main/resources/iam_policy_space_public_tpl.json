@@ -1,0 +1,27 @@
+[
+  {
+    "Effect": "Allow",
+    "Action": [
+      "s3:ListBucket"
+    ],
+    "Resource": [
+      "arn:aws:s3:::${bucket}"
+    ],
+    "Condition": {
+      "StringLike": {
+        "s3:prefix": [
+          "${organization}/${space}/*"
+        ]
+      }
+    }
+  },
+  {
+    "Effect": "Allow",
+    "Action": [
+      "s3:GetObject"
+    ],
+    "Resource": [
+      "arn:aws:s3:::${bucket}/${organization}/${space}/*"
+    ]
+  }
+]

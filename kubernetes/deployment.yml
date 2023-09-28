@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: storagemanager
+  namespace: operations
+  labels:
+    app: storagemanager
+    tier: backend
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8090"
+    prometheus.io/path: "/storagemanager/actuator/prometheus"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: storagemanager
+      labels:
+        app: storagemanager
+        tier: backend
+    spec:
+      serviceAccountName: storagemanager-account
+      containers:
+        - name: storagemanager
+          image: acr$(environment).azurecr.io/storagemanager:$(tagVersion)
+          imagePullPolicy: Always
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "azure"
+          volumeMounts:
+            - name: storagemanager-secret
+              mountPath: "/etc/storagemanager-secret"
+              readOnly: true
+            - name: app-configuration
+              mountPath: "/etc/application"
+              readOnly: true
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 300m
+            limits:
+              memory: 768Mi
+              cpu: 650m
+          ports:
+            - containerPort: 8090
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /storagemanager/actuator/health
+              port: 8090
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 1
+            successThreshold: 1
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 1
+              preference:
+                matchExpressions:
+                  - key: agentpool
+                    operator: In
+                    values:
+                      - userpool
+      volumes:
+        - name: storagemanager-secret
+          secret:
+            secretName: storagemanager-secret
+        - name: app-configuration
+          configMap:
+            name: storagemanager
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: storagemanager
+      tier: backend
