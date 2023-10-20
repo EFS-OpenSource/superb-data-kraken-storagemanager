@@ -4,7 +4,28 @@ metadata:
   name: storagemanager
   namespace: operations
 data:
+  applicationinsights.json: |-
+    {
+      "connectionString": "$(app-insights-con-string)",
+      "role": {
+        "name": "Storage-Manager Backend"
+      },
+      "instrumentation": {
+        "logging": {
+          "level": "OFF"
+        },
+        "micrometer": {
+          "enabled": true
+        }
+      },
+      "heartbeat": {
+        "intervalSeconds": 60
+      }
+    }
   application.yml: |-
+    azure:
+    application-insights:
+      instrumentation-key: $(app-insights-instrumentation-key)
     apidoc:
       title: EFS SDK StorageManager-API
     sdk:
@@ -45,3 +66,7 @@ data:
             blob-versions-until-cool-tier-days: 1
             blob-versions-until-archive-tier-days: 2
             blob-versions-until-delete-days: 14
+    logging:
+    config: classpath:com/efs/sdk/logging/sdk.logback.xml
+    level:
+      com.efs.sdk: $(logging-level)
