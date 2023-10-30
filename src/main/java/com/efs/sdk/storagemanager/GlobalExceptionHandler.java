@@ -52,7 +52,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = AccessDeniedException.class)
     protected ResponseEntity<Object> handleAccessDeniedException(RuntimeException e, WebRequest request) {
-        LOG.debug(e.getMessage(), e);
+        LOG.error(e.getMessage(), e);
         Iterable<String> iter = request::getHeaderNames;
         Optional<String> authHeader = StreamSupport.stream(iter.spliterator(), false)
                 .filter(p -> p.equalsIgnoreCase(HttpHeaders.AUTHORIZATION)).findFirst();
@@ -66,7 +66,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = StorageManagerException.class)
     private ResponseEntity<Object> handleStorageManagerException(StorageManagerException ex, WebRequest request) {
-        LOG.debug(ex.getMessage(), ex);
+        LOG.error(ex.getMessage(), ex);
         // Creating a map to hold the error details.
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", new Date());
