@@ -67,6 +67,7 @@ data:
             blob-versions-until-archive-tier-days: 2
             blob-versions-until-delete-days: 14
     logging:
-    config: classpath:com/efs/sdk/logging/sdk.logback.xml
-    level:
-      com.efs.sdk: $(logging-level)
+      config: classpath:com/efs/sdk/logging/sdk.logback.xml
+      level:
+        com.efs.sdk: $(logging-level)
+        org.springframework.web: INFO
