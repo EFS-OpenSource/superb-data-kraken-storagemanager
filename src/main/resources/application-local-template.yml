@@ -3,7 +3,7 @@ apidoc:
 sdk:
   oauth2:
     config-url: https://$(DOMAIN)/auth/realms/$(REALM)/.well-known/openid-configuration
-    client-id: sdk-client
+    client-id: $(CLIENT-ID)
     authorization-grant-type: authorization_code
     scope: openid
     user-name-attribute: preferred_username
@@ -13,7 +13,7 @@ management:
       exposure:
         include: [ prometheus, health, info ]
 server:
-  port: 8090
+  port: 8093
   servlet:
     context-path: /storagemanager
 storagemanager:
@@ -39,9 +39,3 @@ storagemanager:
         client-id: <client-id>
         client-secret: <client-secret>
         tenant: <tenant>
-    #  # using S3 storage:
-    #  s3:
-    #   endpoint: storage.sdk.example.com
-    #   accessKey: <S3_ACCESS_KEY>
-    #   secretKey: <S3_SECRET_KEY>
-    #   bucketName: sdk-storage
