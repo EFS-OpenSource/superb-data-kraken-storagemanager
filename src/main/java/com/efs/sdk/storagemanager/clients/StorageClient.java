@@ -31,6 +31,8 @@ import com.efs.sdk.storagemanager.commons.StorageManagerException;
  */
 public interface StorageClient {
 
+    String LOADINGZONE = "loadingzone";
+
     /**
      * Create a storage for the provided organization.
      *
@@ -38,6 +40,8 @@ public interface StorageClient {
      * @throws StorageManagerException thrown on errors
      */
     void createOrganizationStorage(OrganizationContextDTO organization) throws StorageManagerException;
+
+    void createLoadingzone(OrganizationContextDTO organization) throws StorageManagerException;
 
     /**
      * Create a new storage the provided space.

@@ -36,6 +36,7 @@ public class StorageService {
     public void createOrganizationStorage(OrganizationContextDTO organization) throws StorageManagerException {
         LOG.info("Creating storage for organization '{}'", organization.getName());
         storageClient.createOrganizationStorage(organization);
+        storageClient.createLoadingzone(organization);
         LOG.info("Creating storage for organization '{}' ... successful", organization.getName());
     }
 

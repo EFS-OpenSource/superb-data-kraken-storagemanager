@@ -49,7 +49,6 @@ public class StorageClientS3 implements StorageClient {
 
     private static final Logger LOG = LoggerFactory.getLogger(StorageClientS3.class);
     private static final String ROLE_SPC_PUBLIC_ACCESS = "spc_all_public";
-    private static final String PROP_SPACE_LOADINGZONE = "loadingzone";
     private final S3Client s3;
     private final String bucketName;
     private final ObjectMapper objectMapper;
@@ -76,12 +75,16 @@ public class StorageClientS3 implements StorageClient {
         if (!s3.objectExists(prefix)) {
             LOG.info("Creating empty object '{}' as virtual folder in bucket '{}'.", prefix, bucketName);
             s3.createEmptyObject(prefix);
-            // create loadingzone directly with organization
-            String spacePrefix = format("%s/%s/", organization.getName(), PROP_SPACE_LOADINGZONE);
-            s3.createEmptyObject(spacePrefix);
         } else {
             LOG.info("Object '{}' as virtual folder in bucket '{}' already exists.", prefix, bucketName);
         }
+    }
+
+    @Override
+    public void createLoadingzone(OrganizationContextDTO organization) throws StorageManagerException {
+        // create loadingzone directly with organization
+        String loadingzonePrefix = format("%s/%s/", organization.getName(), LOADINGZONE);
+        s3.createEmptyObject(loadingzonePrefix);
     }
 
     /**
@@ -89,10 +92,6 @@ public class StorageClientS3 implements StorageClient {
      */
     @Override
     public void createSpaceStorage(SpaceContextDTO space) {
-        if (PROP_SPACE_LOADINGZONE.equalsIgnoreCase(space.getName())) {
-            return;
-        }
-
         String orgaPrefix = format("%s/", space.getOrganization().getName());
         String spacePrefix = format("%s/%s/", space.getOrganization().getName(), space.getName());
 
@@ -250,7 +249,7 @@ public class StorageClientS3 implements StorageClient {
             if (Confidentiality.PUBLIC.equals(space.getConfidentiality())) {
                 removePublicPolicy(space);
             }
-            if (!space.getName().equalsIgnoreCase(PROP_SPACE_LOADINGZONE)) {
+            if (!LOADINGZONE.equalsIgnoreCase(space.getName())) {
                 s3.deleteObjectsByPrefix(prefix);
                 s3.deleteIamPolicy(join("_", space.getOrganization().getName(), space.getName(), "admin"));
                 s3.deleteIamPolicy(join("_", space.getOrganization().getName(), space.getName(), "trustee"));

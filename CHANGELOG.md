@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- none
+
+### Changed
+- upgrade logging-library
+- loadingzone is no longer a space
+  - create space-storage directly with organization-storage
+
+### Removed
+- none
+
+---
+
 ## 1.1.0 - 2023-10-05
 
 ### Added
@@ -26,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - none
+
+---
 
 ## 1.0.0 - 2023-09-28
 

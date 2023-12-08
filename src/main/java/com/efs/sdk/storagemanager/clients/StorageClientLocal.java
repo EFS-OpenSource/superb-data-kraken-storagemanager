@@ -59,6 +59,11 @@ public class StorageClientLocal implements StorageClient {
         }
     }
 
+    @Override
+    public void createLoadingzone(OrganizationContextDTO organization) throws StorageManagerException {
+        createSpaceDir(organization.getName(), LOADINGZONE);
+    }
+
     /**
      * {@inheritDoc}
      * <br>
@@ -66,7 +71,11 @@ public class StorageClientLocal implements StorageClient {
      */
     @Override
     public void createSpaceStorage(SpaceContextDTO space) throws StorageManagerException {
-        Path newDirOrg = getOrganizationPath(space.getOrganization().getName());
+        createSpaceDir(space.getOrganization().getName(), space.getName());
+    }
+
+    private void createSpaceDir(String orgaName, String spcName) throws StorageManagerException {
+        Path newDirOrg = getOrganizationPath(orgaName);
         if (!Files.exists(newDirOrg)) {
             try {
                 Files.createDirectory(newDirOrg);
@@ -76,7 +85,7 @@ public class StorageClientLocal implements StorageClient {
             }
         }
         try {
-            Path newDir = getSpacePath(space);
+            Path newDir = getSpacePath(orgaName, spcName);
             if (Files.exists(newDir)) {
                 LOG.warn("directory '{}' already exists - nothing to do", newDir);
                 return;
@@ -107,7 +116,7 @@ public class StorageClientLocal implements StorageClient {
     @Override
     public void deleteSpaceStorage(SpaceContextDTO space) throws StorageManagerException {
         try {
-            FileSystemUtils.deleteRecursively(getSpacePath(space));
+            FileSystemUtils.deleteRecursively(getSpacePath(space.getOrganization().getName(), space.getName()));
         } catch (IOException e) {
             LOG.error("failed to delete space storage.");
             throw new StorageManagerException(e.getMessage());
@@ -118,8 +127,8 @@ public class StorageClientLocal implements StorageClient {
         return getPath(organizationName);
     }
 
-    private Path getSpacePath(SpaceContextDTO space) {
-        return getPath(space.getOrganization().getName()).resolve(space.getName());
+    private Path getSpacePath(String orgaName, String spcName) {
+        return getPath(orgaName).resolve(spcName);
     }
 
     private Path getPath(String dirName) {
