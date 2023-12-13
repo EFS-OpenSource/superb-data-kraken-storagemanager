@@ -3,7 +3,7 @@ apidoc:
 sdk:
   oauth2:
     config-url: https://$(DOMAIN)/auth/realms/$(REALM)/.well-known/openid-configuration
-    client-id: $(CLIENT-ID)
+    client-id: $(CLIENT_ID)
     authorization-grant-type: authorization_code
     scope: openid
     user-name-attribute: preferred_username
@@ -11,7 +11,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: [ prometheus, health, info ]
+        include: [prometheus, health, info]
 server:
   port: 8093
   servlet:
@@ -24,7 +24,7 @@ storagemanager:
         origins: $(DOMAIN)
         maxAge: 60
       region: westeurope
-      resourcegroup: SDK
+      resourcegroup: $(RESOURCE_GROUP)
       # these are the default settings in the azure storage client and don't have to be explicitly set
       storage-account-default-settings:
         soft-delete-blobs-enabled: true
@@ -36,6 +36,6 @@ storagemanager:
         blob-versions-until-archive-tier-days: 2
         blob-versions-until-delete-days: 14
       user:
-        client-id: <client-id>
-        client-secret: <client-secret>
-        tenant: <tenant>
+        client-id: $(AZURE_STORAGE_CLIENT_ID)
+        client-secret: $(AZURE_STORAGE_CLIENT_SECRET)
+        tenant: $(AZURE_TENANT_ID)

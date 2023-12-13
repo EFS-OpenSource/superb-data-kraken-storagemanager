@@ -76,7 +76,7 @@ storagemanager:
   storage:
     azure:
       cors:
-        origins: sdk.efs.ai
+        origins: $(DOMAIN)
         maxAge: 86400
       user:
         client-id:

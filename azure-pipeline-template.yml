@@ -1,18 +1,17 @@
 # Template parameters
 parameters:
-- name: stage
-  type: string
-  values:
-  - 'dev'
-  - 'prod'
-  default: 'dev'
+  - name: stage
+    type: string
+    values:
+      - 'dev'
+      - 'prod'
+    default: 'dev'
 
 # variables used for all stages
 variables:
   imageRepository: 'storagemanager'
-  containerRegistry: 'acr$(environment).azurecr.io'
+  containerRegistry: '$(CONTAINER_REGISTRY)'
   dockerfilePath: 'Dockerfile'
-  imagePullSecret: 'acr$(environment)-auth'
   ${{ if eq(parameters.stage, 'prod') }}:
     tagVersion: '$(Build.BuildId)'
     tagLatest: 'latest'
@@ -130,19 +129,6 @@ stages:
                   inputs:
                     script: |
                       echo "kubernetesServiceConnection is $(kubernetesServiceConnection)"
-                      [[ ! -z "$(imagePullSecret)" ]] && echo "imagePullSecret is Not empty" || echo "imagePullSecret is Empty"
-                - task: KubernetesManifest@0
-                  inputs:
-                    action: 'createSecret'
-                    kubernetesServiceConnection: '$(kubernetesServiceConnection)'
-                    namespace: 'operations'
-                    secretType: 'dockerRegistry'
-                    secretName: '$(imagePullSecret)'
-                    dockerRegistryEndpoint: '$(dockerRegistryServiceConnection)'
-                - task: CmdLine@2
-                  inputs:
-                    script: |
-                      echo "environment is $(environment)"
                 - task: replacetokens@3
                   inputs:
                     rootDirectory: '$(Pipeline.Workspace)'
@@ -167,4 +153,3 @@ stages:
                       $(Pipeline.Workspace)/kubernetes/service.yml
                       $(Pipeline.Workspace)/kubernetes/ingress.yml
                     containers: '$(containerRegistry)/$(imageRepository):$(tagVersion)'
-                    imagePullSecrets: '$(imagePullSecret)'
