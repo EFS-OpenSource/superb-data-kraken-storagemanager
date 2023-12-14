@@ -10,6 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 
+---
+
+
+## 1.2.0 - 2023-12-14
+
+
 ### Added
 
 - none
@@ -19,17 +25,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - adjusted properties for installation-guide
 - upgrade logging-library
 - loadingzone is no longer a space
-  - create space-storage directly with organization-storage
+    - create space-storage directly with organization-storage
 
 ### Removed
 
-- none
-
----
 
 ## 1.1.0 - 2023-10-05
 
+
 ### Added
+
 - sdk-logging library and all dependencies:
     - add mvn library
     - adjust azure pipeline
@@ -40,20 +45,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - contributing guide
 
 ### Changed
+
 - none
 
 ### Removed
+
 - none
 
 ---
 
+
 ## 1.0.0 - 2023-09-28
 
+
 ### Added
+
 - initial release
 
 ### Changed
+
 - none
 
 ### Removed
+
 - none
