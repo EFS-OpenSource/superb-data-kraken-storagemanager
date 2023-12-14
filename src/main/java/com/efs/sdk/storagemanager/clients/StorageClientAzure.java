@@ -165,6 +165,12 @@ public class StorageClientAzure implements StorageClient {
         LOG.debug("Creating storage account for organization {} ... successful", organization.getName());
     }
 
+    @Override
+    public void createLoadingzone(OrganizationContextDTO organization) throws StorageManagerException {
+        LOG.debug("Creating loadingzone for organization {}", organization.getName());
+        createBlobContainer(LOADINGZONE, organization.getName());
+    }
+
     /**
      * Sets the required storage account properties, such as enabling soft delete for blobs and containers,
      * and activating versioning for blobs.
@@ -312,39 +318,7 @@ public class StorageClientAzure implements StorageClient {
     @Override
     public void createSpaceStorage(SpaceContextDTO space) throws StorageManagerException {
         LOG.debug("Creating storage container for space {}", space.getName());
-        BlobContainerClient blobContainer = null;
-        String errorMessage = "";
-        for (int retry = 0; retry < maxRetries; retry++) {
-            try {
-                Optional<StorageAccount> account = getStorageAccount(space.getOrganization().getName());
-                if (account.isPresent()) {
-                    StorageAccount storageAccount = account.get();
-                    if (ProvisioningState.SUCCEEDED.equals(storageAccount.provisioningState())) {
-                        BlobServiceClient blobServiceClient = getBlobServiceClient(storageAccount);
-
-                        blobContainer = blobServiceClient.getBlobContainerClient(space.getName());
-                        if (!blobContainer.exists()) {
-                            blobContainer = blobServiceClient.createBlobContainer(space.getName());
-                        }
-                        if (blobContainer.exists()) {
-                            break;
-                        }
-                    }
-                }
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                LOG.warn(e.getMessage(), e);
-                Thread.currentThread().interrupt();
-            } catch (Exception e) {
-                LOG.warn(e.getMessage(), e);
-                errorMessage = e.getMessage();
-            }
-        }
-        if (blobContainer == null || !blobContainer.exists()) {
-            throw new StorageManagerException(format("was not able to create container '%s' for storage " + "account" + " '%s', reason '%s'",
-                    space.getName(), space.getOrganization().getName(), errorMessage));
-        }
-        LOG.debug("Creating storage container for space {} ... successful", space.getName());
+        createBlobContainer(space.getName(), space.getOrganization().getName());
     }
 
     /**
@@ -414,6 +388,48 @@ public class StorageClientAzure implements StorageClient {
         String connectStr = getConnectionString(storageAccount);
         // Create a BlobServiceClient object which will be used to create a container client
         return new BlobServiceClientBuilder().connectionString(connectStr).buildClient();
+    }
+
+    /**
+     * Create a blob container for a given storage account
+     *
+     * @param blobContainerName Blob Container name (space name)
+     * @param organizationName  Organization name
+     * @throws StorageManagerException
+     */
+    private void createBlobContainer(String blobContainerName, String organizationName)
+            throws StorageManagerException {
+        LOG.debug("Creating blob container {} for organization {}", blobContainerName, organizationName);
+        BlobContainerClient blobContainer = null;
+        String errorMessage = "";
+        for (int retry = 0; retry < maxRetries; retry++) {
+            try {
+                Optional<StorageAccount> storageAccount = getStorageAccount(organizationName);
+                if (storageAccount.isPresent()) {
+                    if (ProvisioningState.SUCCEEDED.equals(storageAccount.get().provisioningState())) {
+                        BlobServiceClient blobServiceClient = getBlobServiceClient(storageAccount.get());
+
+                        if (!blobServiceClient.getBlobContainerClient(blobContainerName).exists()) {
+                            blobContainer = blobServiceClient.createBlobContainer(blobContainerName);
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                Thread.sleep(delay);
+            } catch (InterruptedException e) {
+                LOG.warn(e.getMessage(), e);
+                Thread.currentThread().interrupt();
+            } catch (Exception e) {
+                LOG.warn(e.getMessage(), e);
+                errorMessage = e.getMessage();
+            }
+        }
+        if (blobContainer == null || !blobContainer.exists()) {
+            throw new StorageManagerException(format("was not able to create container for storage account '%s' in organization '%s', reason '%s'",
+                    blobContainerName, organizationName, errorMessage));
+        }
+        LOG.debug("Creating storage container {} for {} ... successful", blobContainer, organizationName);
     }
 
     /**

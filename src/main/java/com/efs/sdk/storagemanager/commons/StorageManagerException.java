@@ -45,7 +45,7 @@ public class StorageManagerException extends Exception {
      */
     public enum STORAGEMANAGER_ERROR {
         // unable creating resources
-
+        FORBIDDEN(10028, HttpStatus.FORBIDDEN, "The requested action is forbidden"),
         UNABLE_CREATE_STORAGE_ACCOUNT(20002, HttpStatus.BAD_REQUEST, "unable to create storage account"),
         UNABLE_DELETE_STORAGE_ACCOUNT(20012, HttpStatus.BAD_REQUEST, "unable to delete storage account"),
         UNABLE_GET_TOKEN(20022, HttpStatus.BAD_REQUEST, "unable to retrieve token for user"),

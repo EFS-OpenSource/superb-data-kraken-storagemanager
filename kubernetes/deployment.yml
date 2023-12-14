@@ -21,55 +21,55 @@ spec:
     spec:
       serviceAccountName: storagemanager-account
       containers:
-        - name: storagemanager
-          image: acr$(environment).azurecr.io/storagemanager:$(tagVersion)
-          imagePullPolicy: Always
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: "azure"
-          volumeMounts:
-            - name: storagemanager-secret
-              mountPath: "/etc/storagemanager-secret"
-              readOnly: true
-            - name: app-configuration
-              mountPath: "/etc/application"
-              readOnly: true
-          resources:
-            requests:
-              memory: 512Mi
-              cpu: 300m
-            limits:
-              memory: 768Mi
-              cpu: 650m
-          ports:
-            - containerPort: 8090
-              name: http
-          readinessProbe:
-            httpGet:
-              path: /storagemanager/actuator/health
-              port: 8090
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 2
-            failureThreshold: 1
-            successThreshold: 1
+      - name: storagemanager
+        image: $(CONTAINER_REGISTRY)/storagemanager:$(tagVersion)
+        imagePullPolicy: Always
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: "azure"
+        volumeMounts:
+        - name: storagemanager-secret
+          mountPath: "/etc/storagemanager-secret"
+          readOnly: true
+        - name: app-configuration
+          mountPath: "/etc/application"
+          readOnly: true
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 300m
+          limits:
+            memory: 768Mi
+            cpu: 650m
+        ports:
+        - containerPort: 8090
+          name: http
+        readinessProbe:
+          httpGet:
+            path: /storagemanager/actuator/health
+            port: 8090
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 1
+          successThreshold: 1
       affinity:
         nodeAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 1
-              preference:
-                matchExpressions:
-                  - key: agentpool
-                    operator: In
-                    values:
-                      - userpool
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: agentpool
+                operator: In
+                values:
+                - userpool
       volumes:
-        - name: storagemanager-secret
-          secret:
-            secretName: storagemanager-secret
-        - name: app-configuration
-          configMap:
-            name: storagemanager
+      - name: storagemanager-secret
+        secret:
+          secretName: storagemanager-secret
+      - name: app-configuration
+        configMap:
+          name: storagemanager
       restartPolicy: Always
   selector:
     matchLabels:

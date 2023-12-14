@@ -15,20 +15,28 @@ limitations under the License.
  */
 package com.efs.sdk.storagemanager;
 
+import com.efs.sdk.logging.AuditLogger;
 import com.efs.sdk.storagemanager.commons.StorageManagerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
 
+import static com.efs.sdk.storagemanager.commons.StorageManagerException.STORAGEMANAGER_ERROR.FORBIDDEN;
 import static com.efs.sdk.storagemanager.commons.StorageManagerException.STORAGEMANAGER_ERROR.UNKNOWN_ERROR;
+import static com.efs.sdk.storagemanager.helper.Utils.getSubjectAsToken;
 
 
 @RestControllerAdvice
@@ -42,9 +50,23 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleStorageManagerException(new StorageManagerException(UNKNOWN_ERROR), request);
     }
 
+    @ExceptionHandler(value = AccessDeniedException.class)
+    protected ResponseEntity<Object> handleAccessDeniedException(RuntimeException e, WebRequest request) {
+        LOG.error(e.getMessage(), e);
+        Iterable<String> iter = request::getHeaderNames;
+        Optional<String> authHeader = StreamSupport.stream(iter.spliterator(), false)
+                .filter(p -> p.equalsIgnoreCase(HttpHeaders.AUTHORIZATION)).findFirst();
+        if (authHeader.isPresent()) {
+            String requestURI = ((ServletWebRequest) request).getRequest().getRequestURI();
+            AuditLogger.error(LOG, "triggered access denied on context {}", getSubjectAsToken(),
+                    requestURI);
+        }
+        return handleStorageManagerException(new StorageManagerException(FORBIDDEN), request);
+    }
+
     @ExceptionHandler(value = StorageManagerException.class)
     private ResponseEntity<Object> handleStorageManagerException(StorageManagerException ex, WebRequest request) {
-        LOG.debug(ex.getMessage(), ex);
+        LOG.error(ex.getMessage(), ex);
         // Creating a map to hold the error details.
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("timestamp", new Date());

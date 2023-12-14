@@ -18,7 +18,9 @@ package com.efs.sdk.storagemanager.core;
 
 import com.efs.sdk.common.domain.dto.OrganizationContextDTO;
 import com.efs.sdk.common.domain.dto.SpaceContextDTO;
+import com.efs.sdk.logging.AuditLogger;
 import com.efs.sdk.storagemanager.commons.StorageManagerException;
+import com.efs.sdk.storagemanager.helper.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,7 @@ public class StorageManagerService {
     public void createOrganizationContext(OrganizationContextDTO org) throws StorageManagerException {
         LOG.debug("creating organization storage context for '{}'", org.getName());
         storageService.createOrganizationStorage(org);
+        AuditLogger.info(LOG, "successfully created storage context for organization {}", Utils.getSubjectAsToken(), org);
         LOG.debug("creating organization storage context for '{}' ... successful", org.getName());
     }
 
@@ -58,6 +61,7 @@ public class StorageManagerService {
         // only name needed for delete operation
         OrganizationContextDTO org = OrganizationContextDTO.builder().name(orgaName).build();
         storageService.deleteOrganizationStorage(org);
+        AuditLogger.info(LOG, "successfully deleted storage context for organization {}", Utils.getSubjectAsToken(), org);
         LOG.debug("deleting organization storage context for '{}' ... successful", orgaName);
     }
 
@@ -72,6 +76,8 @@ public class StorageManagerService {
     public void createSpaceContext(SpaceContextDTO space) throws StorageManagerException {
         LOG.debug("creating space storage context for '{}'", space.getName());
         storageService.createSpaceStorage(space);
+        AuditLogger.info(LOG, "successfully created storage context for organization {} and space {}",
+                Utils.getSubjectAsToken(), space.getOrganization().getName(), space.getName());
         LOG.debug("creating space storage context for '{}' ... successful", space.getName());
     }
 
@@ -88,6 +94,8 @@ public class StorageManagerService {
         OrganizationContextDTO org = OrganizationContextDTO.builder().name(orgaName).build();
         SpaceContextDTO spaceContext = SpaceContextDTO.builder().name(spaceName).organization(org).build();
         this.storageService.deleteSpaceStorage(spaceContext);
+        AuditLogger.info(LOG, "successfully deleted storage context for organization {} and space {}",
+                Utils.getSubjectAsToken(), org, spaceName);
         LOG.debug("deleting space storage context for '{}' ... successful", spaceName);
     }
 }

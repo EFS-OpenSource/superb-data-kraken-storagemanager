@@ -4,13 +4,34 @@ metadata:
   name: storagemanager
   namespace: operations
 data:
+  applicationinsights.json: |-
+    {
+      "connectionString": "$(APP_INSIGHTS_CONNECTION_STRING)",
+      "role": {
+        "name": "Storage-Manager Backend"
+      },
+      "instrumentation": {
+        "logging": {
+          "level": "OFF"
+        },
+        "micrometer": {
+          "enabled": true
+        }
+      },
+      "heartbeat": {
+        "intervalSeconds": 60
+      }
+    }
   application.yml: |-
+    azure:
+    application-insights:
+      instrumentation-key: $(APP_INSIGHTS_INSTRUMENTATION_KEY)
     apidoc:
-      title: EFS SDK StorageManager-API
+      title: SDK StorageManager-API
     sdk:
       oauth2:
-        config-url: http://keycloak$(postfix)-http.operations.svc.cluster.local/auth/realms/efs-$(environment)/.well-known/openid-configuration
-        client-id: $(environment)-client
+        config-url: http://keycloak$(postfix)-http.operations.svc.cluster.local/auth/realms/$(REALM)/.well-known/openid-configuration
+        client-id: $(CLIENT_ID)
         authorization-grant-type: authorization_code
         scope: openid
         user-name-attribute: preferred_username
@@ -32,9 +53,9 @@ data:
         azure:
           region: westeurope
           cors:
-            origins: https://$(main-domain)
+            origins: https://$(DOMAIN)
             maxAge: 60
-          resourcegroup: $(resourcegroup)
+          resourcegroup: $(RESOURCE_GROUP)
           # these are the default settings in the azure storage client and don't have to be explicitly set
           storage-account-default-settings:
             soft-delete-blobs-enabled: true
@@ -45,3 +66,8 @@ data:
             blob-versions-until-cool-tier-days: 1
             blob-versions-until-archive-tier-days: 2
             blob-versions-until-delete-days: 14
+    logging:
+      config: classpath:com/efs/sdk/logging/sdk.logback.xml
+      level:
+        com.efs.sdk: $(LOG_LEVEL)
+        org.springframework.web: INFO

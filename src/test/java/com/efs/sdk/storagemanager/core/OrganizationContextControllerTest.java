@@ -18,17 +18,27 @@ package com.efs.sdk.storagemanager.core;
 import com.efs.sdk.common.domain.dto.OrganizationContextDTO;
 import com.efs.sdk.storagemanager.commons.StorageManagerException;
 import com.efs.sdk.storagemanager.helper.AuthHelper;
+import com.efs.sdk.storagemanager.helper.Utils;
+import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -48,12 +58,23 @@ class OrganizationContextControllerTest {
     private JwtAuthenticationToken token;
     private OrganizationContextDTO dto;
     private String orgaName;
+    private MockedStatic<Utils> mockedUtils;
 
     @BeforeEach
     void setUp() {
-        token = mock(JwtAuthenticationToken.class);
+        token = new JwtAuthenticationToken(Jwt.withTokenValue("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIi" +
+                        "OiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2Q" +
+                        "T4fwpMeJf36POk6yJV_adQssw5c").header("alg", "none")
+                .claim("q", "q").build());
         dto = new OrganizationContextDTO();
         orgaName = "testOrg";
+        mockedUtils = mockStatic(Utils.class);
+        mockedUtils.when(Utils::getSubjectAsToken).thenReturn(token);
+    }
+
+    @AfterEach
+    public void teardown() {
+        mockedUtils.close();
     }
 
     @Test

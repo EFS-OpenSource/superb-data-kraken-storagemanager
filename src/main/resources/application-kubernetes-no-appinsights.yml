@@ -12,7 +12,6 @@ spring:
       config:
         paths:
           - /etc/application/application.yml
-          - /etc/application/applicationinsights.json
         enable-api: false
       reload:
         enabled:

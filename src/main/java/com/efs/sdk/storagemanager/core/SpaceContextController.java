@@ -16,6 +16,7 @@ limitations under the License.
 package com.efs.sdk.storagemanager.core;
 
 import com.efs.sdk.common.domain.dto.SpaceContextDTO;
+import com.efs.sdk.logging.AuditLogger;
 import com.efs.sdk.storagemanager.commons.StorageManagerException;
 import com.efs.sdk.storagemanager.helper.AuthHelper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +24,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -37,6 +40,7 @@ import static com.efs.sdk.storagemanager.commons.StorageManagerException.STORAGE
 @Tag(name = SpaceContextController.ENDPOINT, description = "Operations for managing storage resources of a space.")
 public class SpaceContextController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SpaceContextController.class);
     static final String VERSION = "v2.0";
     static final String ENDPOINT = "/" + VERSION + "/context/organization/{orgaName}/space/";
 
@@ -72,6 +76,8 @@ public class SpaceContextController {
             SpaceContextDTO payload
     ) throws StorageManagerException {
         if (!authHelper.isSuperuser(token)) {
+            AuditLogger.error(LOG, "insufficient permissions to create space context on organization  {} " +
+                    "and space {}", token, orgaName, payload.getName());
             throw new StorageManagerException(INSUFFICIENT_PRIVILEGE);
         }
 
@@ -107,6 +113,8 @@ public class SpaceContextController {
             String spaceName
     ) throws StorageManagerException {
         if (!authHelper.isSuperuser(token)) {
+            AuditLogger.error(LOG, "insufficient permissions to delete space context on organization  {} " +
+                    "and space {}", token, orgaName, spaceName);
             throw new StorageManagerException(INSUFFICIENT_PRIVILEGE);
         }
         storageManagerService.deleteSpaceContext(orgaName, spaceName);

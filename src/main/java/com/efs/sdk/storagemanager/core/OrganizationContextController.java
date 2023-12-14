@@ -16,12 +16,15 @@ limitations under the License.
 package com.efs.sdk.storagemanager.core;
 
 import com.efs.sdk.common.domain.dto.OrganizationContextDTO;
+import com.efs.sdk.logging.AuditLogger;
 import com.efs.sdk.storagemanager.commons.StorageManagerException;
 import com.efs.sdk.storagemanager.helper.AuthHelper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,6 +40,7 @@ import static com.efs.sdk.storagemanager.commons.StorageManagerException.STORAGE
 @Tag(name = OrganizationContextController.ENDPOINT, description = "Operations for managing storage resources of an organization.")
 public class OrganizationContextController {
 
+    private static final Logger LOG = LoggerFactory.getLogger(OrganizationContextController.class);
     static final String VERSION = "v2.0";
     static final String RESOURCE = "context/organization/";
     static final String ENDPOINT = "/" + VERSION + "/" + RESOURCE;
@@ -88,6 +92,8 @@ public class OrganizationContextController {
             @PathVariable @Parameter(description = "Name of the organization whose storage context needs to be deleted.") String orgaName
     ) throws StorageManagerException {
         if (!authHelper.isSuperuser(token)) {
+            AuditLogger.error(LOG, "insufficient permissions to delete organization context on organization  {}",
+                    token, orgaName);
             throw new StorageManagerException(INSUFFICIENT_PRIVILEGE);
         }
         storageManagerService.deleteOrganizationContext(orgaName);
